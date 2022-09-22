@@ -18,7 +18,7 @@ def gtf2dict(gtf_location, species_name):
             line_elements = line.split("\t")
             scaff = line_elements[0]
             line_type = line_elements[2]
-            if line_type == "gene" or "exon":
+            if line_type == "gene" or line_type =="exon":
                 start = line_elements[3]
                 end = line_elements[4]
                 strand = line_elements[6]
@@ -38,7 +38,7 @@ for file in gtf_file_list:
 
 #################################### annotation start 
 seq_file = open(f"/lustre1/g/sbs_cgz/maf_synteny/{sys.argv[1]}", "r")
-annotation_synteny_file =open(f"/lustre1/u/dongyao/maf_exp/{sys.argv[2]}", "a")
+ana_file = open(f"/lustre1/g/sbs_cgz/maf_synteny/{sys.argv[2]}", "a")
 line_number = 0
 for line in seq_file.readlines():
     line_number = line_number + 1
@@ -46,19 +46,20 @@ for line in seq_file.readlines():
         continue
     line = line.strip()
     line_elements = line.split("\t")
-    seq_species = line_elements[0].split("_")[1]
+    seq_species = line_elements[0]
     seq_scaff = line_elements[1]
     seq_start = int(line_elements[2])
     seq_end = int(line_elements[3])
-    seq_strand = line_elements[4]
-    exec(f"target_dict = {maf_species}_dict", globals())
+    exec(f"target_dict = {seq_species}_dict", globals())
     for key,val in target_dict.items():
         key_elements = key.split("\t")
         if key_elements[0] == seq_scaff:
-            if seq_start <= key_elements[3] and seq_end >= key_elements[3]:
-                print(key)
-            elif key_elements[3] >= 250:
-                print(key)
+            if seq_start <= int(key_elements[3]) and seq_end >= int(key_elements[3]):
+                print(f"{seq_species}\t{key}\t{val}")
+                ana_file.write(f"{seq_species}\t{key}\t{val}\n")
+            elif int(key_elements[3]) >= seq_end:
+                print(f"{seq_species}\t{key}\t{val}")
+                ana_file.write(f"{seq_species}\t{key}\t{val}\n")
                 break
 
 

@@ -15,7 +15,7 @@ def split_species_scaff(maf_line):
     species_scaff = re.search(r"caenorhabditis_([a-z]+)[.]{1}(\S*)", maf_line)
     species = species_scaff.group(1)
     scaff = species_scaff.group(2)
-    species_name_list = [species, scaff, f"{species}_{scaff}"]
+    species_name_list = [species, scaff, f"caenorhabditis_{species}.{scaff}"]
     return species_name_list
 
 def split_start_end_strand(maf_line):  #####turn to gff 1 based coordinates
@@ -62,9 +62,14 @@ def synteney_analysis(list_name_list, two_compare_object, ava_location, out_seq_
                 if species_scaff[2] not in out_seq_dict.keys():
                     out_seq_dict[f"{species_scaff[2]}"] = [start_end_strand_list[0]] ### record seq start
                 elif len(out_seq_dict[f"{species_scaff[2]}"]) == 1:
+                    if out_seq_dict[f"{species_scaff[2]}"][0] >= start_end_strand_list[0]: ##compare seq start
+                        out_seq_dict[f"{species_scaff[2]}"][0] = start_end_strand_list[0]  ## change seq start
                     out_seq_dict[f"{species_scaff[2]}"].append(start_end_strand_list[1]) ### record seq end
                 else:
-                    out_seq_dict[f"{species_scaff[2]}"][1] = start_end_strand_list[1]  ### change seq end
+                    if out_seq_dict[f"{species_scaff[2]}"][1] <= start_end_strand_list[1]:    #compare end 
+                        out_seq_dict[f"{species_scaff[2]}"][1] = start_end_strand_list[1]### change seq end
+                    if out_seq_dict[f"{species_scaff[2]}"][0] >= start_end_strand_list[0]: ##compare seq start
+                        out_seq_dict[f"{species_scaff[2]}"][0] = start_end_strand_list[0]  ## change seq start
             if len(out_ava_list) >= 6:
                 out_line = "\t".join(out_ava_list)
                 ava_file.write(f"{out_line}\n")
@@ -123,8 +128,14 @@ for combination in itertools.combinations(species_name_list,2):
 ##########################################################
 ##########################################################
 
+seq_file = open(seq_location, "a")
+seq_file.write("species\tscaffold\tstart\tend\n")
 for key,val in seq_start_end_dict.items():
-    print(key,val)
+    species = split_species_scaff(key)[0]
+    scaff = split_species_scaff(key)[1]
+    start = val[0]
+    end = val[1]
+    seq_file.write(f"{species}\t{scaff}\t{start}\t{end}\n")
 
 
 
