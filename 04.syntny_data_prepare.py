@@ -35,6 +35,7 @@ def split_start_end_strand(maf_line):  #####turn to gff 1 based coordinates
 
 
 def gap_detection(two_object_2, ava_list):
+    ava_file = open(f"{ava_location}", "a")
     seq_1 = two_object_2[0].split("\t")[6] 
     start_end_strand_list_1 = split_start_end_strand(two_object_2[0])
     seq_2 = two_object_2[1].split("\t")[6]
@@ -49,6 +50,7 @@ def gap_detection(two_object_2, ava_list):
             pass  ### for additional function
         else:
             no_gap_index_list.append(index) 
+    print(no_gap_index_list, "this is no gap index list")
     start = no_gap_index_list[0]
     for index in range(0,len(no_gap_index_list) - 1):
         if no_gap_index_list[(index + 1)] - 1 == no_gap_index_list[index]:
@@ -56,21 +58,21 @@ def gap_detection(two_object_2, ava_list):
         else: ###
             out_no_gap_ava = ava_list
             if out_no_gap_ava[4] == "+":
-                out_no_gap_ava[3] = out_no_gap_ava[2] + no_gap_index_list[index]
-                out_no_gap_ava[2] = out_no_gap_ava[2] + start
+                out_no_gap_ava[3] = str(int(out_no_gap_ava[2]) + no_gap_index_list[index])
+                out_no_gap_ava[2] = str(int(out_no_gap_ava[2]) + start)
             elif out_no_gap_ava[4] == "-":
-                out_no_gap_ava[2] = out_no_gap_ava[3] - no_gap_index_list[index]
-                out_no_gap_ava[3] = out_no_gap_ava[3] - start
+                out_no_gap_ava[2] = str(int(out_no_gap_ava[3]) - no_gap_index_list[index])
+                out_no_gap_ava[3] = str(int(out_no_gap_ava[3]) - start)
             if out_no_gap_ava[9] == "+":
-                out_no_gap_ava[8] = out_no_gap_ava[7] + no_gap_index_list[index]
-                out_no_gap_ava[7] = out_no_gap_ava[7] + start
+                out_no_gap_ava[8] = str(int(out_no_gap_ava[7]) + no_gap_index_list[index])
+                out_no_gap_ava[7] = str(int(out_no_gap_ava[7]) + start)
             else:
-                out_no_gap_ava[7] = out_no_gap_ava[8] - no_gap_index_list[index]
-                out_no_gap_ava[8] = out_no_gap_ava[8] - start
+                out_no_gap_ava[7] = str(int(out_no_gap_ava[8]) - no_gap_index_list[index])
+                out_no_gap_ava[8] = str(int(out_no_gap_ava[8]) - start)
             out_line = "\t".join(out_no_gap_ava)
             ava_file.write(f"{out_line}\n")
             start = no_gap_index_list[(index+1)]
-
+    ava_file.close()
             
 
 def synteney_analysis(list_name_list, two_compare_object, ava_location, out_seq_dict):
@@ -90,7 +92,7 @@ def synteney_analysis(list_name_list, two_compare_object, ava_location, out_seq_
                         str(start_end_strand_list[0]), 
                         str(start_end_strand_list[1]), 
                         start_end_strand_list[2]]
-                gap_detect_list = gap_detect_list.append(line.strip())
+                gap_detect_list.append(line.strip())
                 if species_scaff[2] not in out_seq_dict.keys():
                     out_seq_dict[f"{species_scaff[2]}"] = [start_end_strand_list[0]] ### record seq start
                 elif len(out_seq_dict[f"{species_scaff[2]}"]) == 1:
@@ -103,12 +105,13 @@ def synteney_analysis(list_name_list, two_compare_object, ava_location, out_seq_
                     if out_seq_dict[f"{species_scaff[2]}"][0] >= start_end_strand_list[0]: ##compare seq start
                         out_seq_dict[f"{species_scaff[2]}"][0] = start_end_strand_list[0]  ## change seq start
             if len(out_ava_list) >= 6:
+                #gap_detection(gap_detect_list, out_ava_list)
                 out_line = "\t".join(out_ava_list)
-                gap_detection(gap_detect_list, out_ava_list)
                 ava_file.write(f"{out_line}\n")
                 out_ava_list = out_ava_list[0:5]
-                
+                gap_detect_list = [gap_detect_list[0]]
         out_ava_list = []
+        gap_detect_list = []
     ava_file.close()
     return out_seq_dict
 ##########################################################
