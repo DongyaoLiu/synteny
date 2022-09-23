@@ -1,0 +1,75 @@
+##install package
+library(gggenomes)
+
+##read python script prepared data
+ava = read.table(file = "./example2/ele_X_1050000_1150000.ava")
+seq = read.table(file = "./example2/ele_X_1050000_1150000.seq", header = T)
+gene = read.table(file = "./example2/ele_X_1050000_1150000.ana")
+
+##munipulation gene dataset
+colnames(gene) = c("species", "scaff", "type", "start", "end", "strand","name")
+gene$seq_id = paste(gene$species, gene$scaff ,sep = "_")
+#gene$type[which(gene$type %in% "gene")] =  rep("CDS", 9) 
+## if we want plot gene, only CDS region has color block
+
+##munipulation seq dataset
+colnames(seq) = c("species", "scaff", "start", "end")
+seq$length = as.numeric(seq$end) - as.numeric(seq$start) 
+seq$seq_id = paste(seq$species, seq$scaff ,sep = "_")
+
+
+##munipulation ava dataset 
+colnames(ava) = c("species1", "scaffold1", "start", "end", "strand", 
+                  "species2", "scaffold2", "start2", "end2","strand2")
+ava$seq_id = paste(ava$species1, ava$scaffold1, sep = "_")
+ava$seq_id2 = paste(ava$species2, ava$scaffold2, sep = "_")
+ava$length = seq$length[match(ava$seq_id, seq$seq_id)]
+ava$length2 = seq$length[match(ava$seq_id2, seq$seq_id)]
+ava_sub = ava[ ,colnames(emale_ava)[2:10]] 
+
+##subset data track (seq data)
+by_species_single_seq <- seq %>% group_by(species) %>% 
+  arrange(species, desc(length)) %>% 
+  filter(row_number()==1)
+sub_gene = gene[which(gene$seq_id %in% by_species_single_seq$seq_id),]
+sub_ava = ava[which(ava$seq_id %in% by_species_single_seq$seq_id), ]
+sub_ava = ava[which(ava$seq_id2 %in% by_species_single_seq$seq_id), ]
+sub_ava_dup = sub_ava %>% filter(seq_id2 == seq_id)
+sub_ava_no_dup = sub_ava %>% filter(seq_id2 != seq_id)
+
+## start plot
+p <- gggenomes(seq = by_species_single_seq, genes = sub_gene, links = sub_ava_no_dup) +
+  geom_seq() +
+  geom_bin_label() +
+  geom_link() +
+  geom_gene(aes(fill = name)) +
+  geom_gene_tag(aes(label=name), nudge_y=0.1, check_overlap = TRUE) 
+
+p
+ggsave(filename = "ele_X_1050000_1150000.synteny.pdf", device = "pdf",dpi = 300,
+       limitsize = F)
+
+data(package="gggenomes")
+
+gggenomes(emale_genes, emale_seqs, emale_tirs, emale_ava) %>%
+  add_feats(ngaros=emale_ngaros, gc=emale_gc) %>%
+  add_sublinks(emale_prot_ava) %>%
+  flip_by_links() +
+  geom_feat(position="identity", size=6) +
+  geom_seq() +
+  geom_link(data=links(2)) +
+  geom_bin_label() +
+  geom_gene(aes(fill=name)) +
+  geom_gene_tag(aes(label=name), nudge_y=0.1, check_overlap = TRUE) +
+  geom_feat(data=feats(ngaros), alpha=.3, size=10, position="identity") +
+  geom_feat_note(aes(label="Ngaro-transposon"), feats(ngaros),
+                 nudge_y=.1, vjust=0) +
+  geom_ribbon(aes(x=(x+xend)/2, ymax=y+.24, ymin=y+.38-(.4*score),
+                  group=seq_id, linetype="GC-content"), feats(gc),
+              fill="lavenderblush4", position=position_nudge(y=-.1)) +
+  scale_fill_brewer("Genes", palette="Dark2", na.value="cornsilk3")
+
+emale_prot_ava = emale_prot_ava
+
+
+
