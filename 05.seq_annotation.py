@@ -18,7 +18,7 @@ def gtf2dict(gtf_location, species_name):
             line_elements = line.split("\t")
             scaff = line_elements[0]
             line_type = line_elements[2]
-            if line_type == "gene" or line_type =="exon":
+            if line_type == "gene" or line_type =="CDS":
                 start = line_elements[3]
                 end = line_elements[4]
                 strand = line_elements[6]
@@ -54,16 +54,22 @@ for line in seq_file.readlines():
     for key,val in target_dict.items():
         key_elements = key.split("\t")
         if key_elements[0] == seq_scaff:
-            if seq_start <= int(key_elements[3]) and seq_end >= int(key_elements[3]):
-                print(f"{seq_species}\t{key}\t{val}")
-                ana_file.write(f"{seq_species}\t{key}\t{val}\n")
-            elif int(key_elements[3]) >= seq_end:
-                print(f"{seq_species}\t{key}\t{val}")
-                ana_file.write(f"{seq_species}\t{key}\t{val}\n")
-                break
-
-
-
+            if "gene_coordinates" not in globals():
+                if seq_start <= int(key_elements[3]) and seq_end >= int(key_elements[3]):
+                    print(f"{seq_species}\t{key}\t{val}")
+                    ana_file.write(f"{seq_species}\t{key}\t{val}\n")
+                    if key_elements[1] == "CDS":
+                        gene_coordinates = [int(key_elements[2]),int(key_elements[3])] 
+                elif int(key_elements[3]) >= seq_end:
+                    print(f"{seq_species}\t{key}\t{val}")
+                    gene_name = val
+                    ana_file.write(f"{seq_species}\t{key}\t{val}\n")
+                    break
+            else:
+                if int(key_elements[2]) >= gene_coordinates[0] and int(key_elements[3]) <= gene_coordinates[1]:
+                    print(f"{seq_species}\t{key}\t{val}")
+                else:
+                    del gene_coordinates
 
 
 

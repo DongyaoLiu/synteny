@@ -6,7 +6,7 @@ import itertools
 
 ##########################################################
 ##########################################################
-##  split function
+##                    split function                   ###
 ##########################################################
 ##########################################################
 
@@ -33,21 +33,52 @@ def split_start_end_strand(maf_line):  #####turn to gff 1 based coordinates
         start = end - int(maf_line_elements[3]) + 1
     return [start, end, strand]
 
-class split_speciesDICT_key_info:
-    def __init__(self,dict_key):
-        key_elements = dict_key.split("$")
-        self.scaff = key_elements[0]
-        self.start = int(key_elements[1])
-        self.end = int(key_elements[2])
-        self.strand = key_elements[3]
-        self.block_number = key_elements[4]
 
+def gap_detection(two_object_2, ava_list):
+    seq_1 = two_object_2[0].split("\t")[6] 
+    start_end_strand_list_1 = split_start_end_strand(two_object_2[0])
+    seq_2 = two_object_2[1].split("\t")[6]
+    start_end_strand_list_2 = split_start_end_strand(two_object_2[1])
+    no_gap_index_list = []
+    for index in range(0,len(seq_1)):
+        if seq_1[index] != "-" and seq_2[index] != "-":
+            pass ### for additional function
+        elif seq_1[index] != "-" and seq_1[index] == "-":
+            pass  ### for additional function
+        elif seq_1[index] == "-" and seq_1[index] != "-":
+            pass  ### for additional function
+        else:
+            no_gap_index_list.append(index) 
+    start = no_gap_index_list[0]
+    for index in range(0,len(no_gap_index_list) - 1):
+        if no_gap_index_list[(index + 1)] - 1 == no_gap_index_list[index]:
+            continue
+        else: ###
+            out_no_gap_ava = ava_list
+            if out_no_gap_ava[4] == "+":
+                out_no_gap_ava[3] = out_no_gap_ava[2] + no_gap_index_list[index]
+                out_no_gap_ava[2] = out_no_gap_ava[2] + start
+            elif out_no_gap_ava[4] == "-":
+                out_no_gap_ava[2] = out_no_gap_ava[3] - no_gap_index_list[index]
+                out_no_gap_ava[3] = out_no_gap_ava[3] - start
+            if out_no_gap_ava[9] == "+":
+                out_no_gap_ava[8] = out_no_gap_ava[7] + no_gap_index_list[index]
+                out_no_gap_ava[7] = out_no_gap_ava[7] + start
+            else:
+                out_no_gap_ava[7] = out_no_gap_ava[8] - no_gap_index_list[index]
+                out_no_gap_ava[8] = out_no_gap_ava[8] - start
+            out_line = "\t".join(out_no_gap_ava)
+            ava_file.write(f"{out_line}\n")
+            start = no_gap_index_list[(index+1)]
+
+            
 
 def synteney_analysis(list_name_list, two_compare_object, ava_location, out_seq_dict):
     ava_file = open(f"{ava_location}", "a")
     Obj1 = two_compare_object[0]
     Obj2 = two_compare_object[1]
     out_ava_list = []
+    gap_detect_list = []
     for block_name in list_name_list:
         exec(f"Target_list = {block_name}",globals())
         for line in Target_list:
@@ -59,6 +90,7 @@ def synteney_analysis(list_name_list, two_compare_object, ava_location, out_seq_
                         str(start_end_strand_list[0]), 
                         str(start_end_strand_list[1]), 
                         start_end_strand_list[2]]
+                gap_detect_list = gap_detect_list.append(line.strip())
                 if species_scaff[2] not in out_seq_dict.keys():
                     out_seq_dict[f"{species_scaff[2]}"] = [start_end_strand_list[0]] ### record seq start
                 elif len(out_seq_dict[f"{species_scaff[2]}"]) == 1:
@@ -72,8 +104,10 @@ def synteney_analysis(list_name_list, two_compare_object, ava_location, out_seq_
                         out_seq_dict[f"{species_scaff[2]}"][0] = start_end_strand_list[0]  ## change seq start
             if len(out_ava_list) >= 6:
                 out_line = "\t".join(out_ava_list)
+                gap_detection(gap_detect_list, out_ava_list)
                 ava_file.write(f"{out_line}\n")
                 out_ava_list = out_ava_list[0:5]
+                
         out_ava_list = []
     ava_file.close()
     return out_seq_dict
