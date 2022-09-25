@@ -54,25 +54,27 @@ for line in ava_file.readlines():
     ava_end2 = int(line_elements[8])
     if f"{ava_species}_{ava_scaff}" not in seq_dict.keys():
         seq_dict[f"{ava_species}_{ava_scaff}"] = [ava_start, ava_end]
-    elif f"{ava_species2}_{ava_scaff2}" not in seq_dict.keys():
-        seq_dict[f"{ava_species}_{ava_scaff}"] = [ava_start, ava_end]
-    elif f"{ava_species}_{ava_scaff}" in seq_dict.keys():
+    if f"{ava_species2}_{ava_scaff2}" not in seq_dict.keys():
+        seq_dict[f"{ava_species2}_{ava_scaff2}"] = [ava_start, ava_end]
+    if f"{ava_species}_{ava_scaff}" in seq_dict.keys():
         if seq_dict[f"{ava_species}_{ava_scaff}"][0] >= ava_start:
             seq_dict[f"{ava_species}_{ava_scaff}"][0] = ava_start
-        elif seq_dict[f"{ava_species}_{ava_scaff}"][1] <= ava_end:
+        if seq_dict[f"{ava_species}_{ava_scaff}"][1] <= ava_end:
             seq_dict[f"{ava_species}_{ava_scaff}"][1] = ava_end
-    elif f"{ava_species2}_{ava_scaff2}" in seq_dict.keys():
+    if f"{ava_species2}_{ava_scaff2}" in seq_dict.keys():
         if seq_dict[f"{ava_species2}_{ava_scaff2}"][0] >= ava_start2:
             seq_dict[f"{ava_species2}_{ava_scaff2}"][0] = ava_start2
-        elif seq_dict[f"{ava_species2}_{ava_scaff2}"][1] <= ava_end2:
+        if seq_dict[f"{ava_species2}_{ava_scaff2}"][1] <= ava_end2:
             seq_dict[f"{ava_species2}_{ava_scaff2}"][1] = ava_end2
 
+seq_file = open(f"{sys.argv[3]}", "a")
 for ava_key, ava_val in seq_dict.items():
     ava_key_elements = ava_key.split("_", 1)
     seq_start = ava_val[0]
     seq_end = ava_val[1]
     seq_species = ava_key_elements[0]
     seq_scaff = ava_key_elements[1]
+    seq_file.write(f"{seq_species}\t{seq_scaff}\t{seq_start}\t{seq_end}\n")
     exec(f"target_dict = {seq_species}_dict", globals())
     for key,val in target_dict.items():
         key_elements = key.split("\t")
@@ -94,8 +96,7 @@ for ava_key, ava_val in seq_dict.items():
                 else:
                     del gene_coordinates
 
-
-
+seq_file.close()
 
 
 
