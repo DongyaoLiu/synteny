@@ -37,19 +37,42 @@ for file in gtf_file_list:
         gtf2dict(f"{gtf_location}/{file}", species)
 
 #################################### annotation start 
-seq_file = open(f"/lustre1/g/sbs_cgz/maf_synteny/{sys.argv[1]}", "r")
+ava_file = open(f"/lustre1/g/sbs_cgz/maf_synteny/{sys.argv[1]}", "r")
 ana_file = open(f"/lustre1/g/sbs_cgz/maf_synteny/{sys.argv[2]}", "a")
-line_number = 0
-for line in seq_file.readlines():
-    line_number = line_number + 1
-    if line_number == 1:
-        continue
+
+seq_dict = {}
+for line in ava_file.readlines():
     line = line.strip()
     line_elements = line.split("\t")
-    seq_species = line_elements[0]
-    seq_scaff = line_elements[1]
-    seq_start = int(line_elements[2])
-    seq_end = int(line_elements[3])
+    ava_species = line_elements[0]
+    ava_scaff = line_elements[1]
+    ava_start = int(line_elements[2])
+    ava_end = int(line_elements[3])
+    ava_species2 = line_elements[5]
+    ava_scaff2 = line_elements[6]
+    ava_start2 = int(line_elements[7]) 
+    ava_end2 = int(line_elements[8])
+    if f"{ava_species}_{ava_scaff}" not in seq_dict.keys():
+        seq_dict[f"{ava_species}_{ava_scaff}"] = [ava_start, ava_end]
+    elif f"{ava_species2}_{ava_scaff2}" not in seq_dict.keys():
+        seq_dict[f"{ava_species}_{ava_scaff}"] = [ava_start, ava_end]
+    elif f"{ava_species}_{ava_scaff}" in seq_dict.keys():
+        if seq_dict[f"{ava_species}_{ava_scaff}"][0] >= ava_start:
+            seq_dict[f"{ava_species}_{ava_scaff}"][0] = ava_start
+        elif seq_dict[f"{ava_species}_{ava_scaff}"][1] <= ava_end:
+            seq_dict[f"{ava_species}_{ava_scaff}"][1] = ava_end
+    elif f"{ava_species2}_{ava_scaff2}" in seq_dict.keys():
+        if seq_dict[f"{ava_species2}_{ava_scaff2}"][0] >= ava_start2:
+            seq_dict[f"{ava_species2}_{ava_scaff2}"][0] = ava_start2
+        elif seq_dict[f"{ava_species2}_{ava_scaff2}"][1] <= ava_end2:
+            seq_dict[f"{ava_species2}_{ava_scaff2}"][1] = ava_end2
+
+for ava_key, ava_val in seq_dict.items():
+    ava_key_elements = ava_key.split("_", 1)
+    seq_start = ava_val[0]
+    seq_end = ava_val[1]
+    seq_species = ava_key_elements[0]
+    seq_scaff = ava_key_elements[1]
     exec(f"target_dict = {seq_species}_dict", globals())
     for key,val in target_dict.items():
         key_elements = key.split("\t")

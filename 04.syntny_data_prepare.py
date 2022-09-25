@@ -76,12 +76,13 @@ def gap_detection(two_object_2, ava_list, gap_file_out):
                 ava_file.write(f"{out_line}\n")
                 print(out_line)
                 start = no_gap_index_list[(index+1)]
+               
     else:
         pass 
     ava_file.close()
-            
+    return out_seq_dict
 
-def synteney_analysis(list_name_list, two_compare_object, ava_location, out_seq_dict):
+def synteney_analysis(list_name_list, two_compare_object, ava_location):
     ava_file = open(f"{ava_location}", "a")
     Obj1 = two_compare_object[0]
     Obj2 = two_compare_object[1]
@@ -100,19 +101,8 @@ def synteney_analysis(list_name_list, two_compare_object, ava_location, out_seq_
                         str(start_end_strand_list[1]), 
                         start_end_strand_list[2]]
                 gap_detect_list.append(line.strip())
-                if species_scaff[2] not in out_seq_dict.keys():
-                    out_seq_dict[f"{species_scaff[2]}"] = [start_end_strand_list[0]] ### record seq start
-                elif len(out_seq_dict[f"{species_scaff[2]}"]) == 1:
-                    if out_seq_dict[f"{species_scaff[2]}"][0] >= start_end_strand_list[0]: ##compare seq start
-                        out_seq_dict[f"{species_scaff[2]}"][0] = start_end_strand_list[0]  ## change seq start
-                    out_seq_dict[f"{species_scaff[2]}"].append(start_end_strand_list[1]) ### record seq end
-                else:
-                    if out_seq_dict[f"{species_scaff[2]}"][1] <= start_end_strand_list[1]:    #compare end 
-                        out_seq_dict[f"{species_scaff[2]}"][1] = start_end_strand_list[1]### change seq end
-                    if out_seq_dict[f"{species_scaff[2]}"][0] >= start_end_strand_list[0]: ##compare seq start
-                        out_seq_dict[f"{species_scaff[2]}"][0] = start_end_strand_list[0]  ## change seq start
             if len(out_ava_list) >= 6:
-                gap_detection(gap_detect_list, out_ava_list, sys.argv[4])
+                gap_detection(gap_detect_list, out_ava_list, sys.argv[3])
                 out_line = "\t".join(out_ava_list)
                 ava_file.write(f"{out_line}\n")
                 out_ava_list = out_ava_list[0:5]
@@ -120,7 +110,6 @@ def synteney_analysis(list_name_list, two_compare_object, ava_location, out_seq_
         out_ava_list = []
         gap_detect_list = []
     ava_file.close()
-    return out_seq_dict
 ##########################################################
 ##########################################################
 ##                     Maf read
@@ -159,26 +148,11 @@ for line in maf.readlines():
 ##########################################################
 ##########################################################
 ava_location = sys.argv[2]
-seq_location = sys.argv[3]
 
 seq_start_end_dict = {}
 for combination in itertools.combinations(species_name_list,2):
     seq_start_end_dict = synteney_analysis(block_name_list, combination, ava_location, seq_start_end_dict)
     
-##########################################################
-##########################################################
-##########################################################
-##########################################################
-##########################################################
-
-seq_file = open(seq_location, "a")
-seq_file.write("species\tscaffold\tstart\tend\n")
-for key,val in seq_start_end_dict.items():
-    species = split_species_scaff(key)[0]
-    scaff = split_species_scaff(key)[1]
-    start = val[0]
-    end = val[1]
-    seq_file.write(f"{species}\t{scaff}\t{start}\t{end}\n")
 
 
 
