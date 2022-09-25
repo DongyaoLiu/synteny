@@ -45,21 +45,22 @@ gggenomes(genes = test_gene) + geom_gene() #it works, but not beautiful
 ###Because geom_gene don't realize type "gene"
 ###As the CDS to much when window size is large, so we do some munipulation on gene_set
 munipu_gene = sub_gene %>% filter(type == "gene") 
-munipu_gene$type = rep("CDS", length(munipu_gene))
-gggenomes(genes = munipu_gene) + geom_gene() #it works, but not beautiful
-## Because the compact genomes
+munipu_gene$type = rep("CDS", length(munipu_gene$type))
+gene_test = gggenomes(genes = munipu_gene) + geom_gene() #it works, but not beautifgit## Because the compact genomes
+ggsave(filename = "ele_X_1050000_1150000.synteny.gene_test.png",plot = gene_test, device = "png",dpi = 300,
+       limitsize = T)
 
+gene_test2 = gggenomes(genes = sub_gene) + geom_gene()
+ggsave(filename = "ele_X_1050000_1150000.synteny.gene_test2.png",plot = gene_test2, device = "png",dpi = 300,
+       limitsize = T)
 
 ## start plot
-p <- gggenomes(seq = by_species_single_seq, genes = munipu_gene, links = sub_ava_no_dup) +
+p <- gggenomes(genes = munipu_gene, links = sub_ava_no_dup) +
   geom_seq() +
   geom_bin_label() +
+  geom_gene(aes(fill=name)) +
   geom_link()
   
-
-
-
-
 ggsave(filename = "ele_X_1050000_1150000.synteny.png",plot = p, device = "png",dpi = 300,
        limitsize = T)
 png("ele_X_1050000_1150000.synteny.png")
