@@ -1,6 +1,6 @@
 # synteny
 
-#### This pipeline is designed to visualization of small range of mulit-species whole genome alignment. Base on the file MAF. 
+#### This pipeline is designed to visualization of small range of mulit-species whole genome alignment. Base on the file MAF. And the idea is base on the [perl piplinehttps](http://github.com/Secretloong/Cactus_Alignments_Tools)
 
 ## Usage 
 
