@@ -63,32 +63,6 @@ p <- gggenomes(genes = munipu_gene, links = sub_ava_no_dup) +
   
 ggsave(filename = "ele_X_1050000_1150000.synteny.png",plot = p, device = "png",dpi = 300,
        limitsize = T)
-png("ele_X_1050000_1150000.synteny.png")
-print(p)
-dev.off()
-
-
-data(package="gggenomes")
-
-gggenomes(emale_genes, emale_seqs, emale_tirs, emale_ava) %>%
-  add_feats(ngaros=emale_ngaros, gc=emale_gc) %>%
-  add_sublinks(emale_prot_ava) %>%
-  flip_by_links() +
-  geom_feat(position="identity", size=6) +
-  geom_seq() +
-  geom_link(data=links(2)) +
-  geom_bin_label() +
-  geom_gene(aes(fill=name)) +
-  geom_gene_tag(aes(label=name), nudge_y=0.1, check_overlap = TRUE) +
-  geom_feat(data=feats(ngaros), alpha=.3, size=10, position="identity") +
-  geom_feat_note(aes(label="Ngaro-transposon"), feats(ngaros),
-                 nudge_y=.1, vjust=0) +
-  geom_ribbon(aes(x=(x+xend)/2, ymax=y+.24, ymin=y+.38-(.4*score),
-                  group=seq_id, linetype="GC-content"), feats(gc),
-              fill="lavenderblush4", position=position_nudge(y=-.1)) +
-  scale_fill_brewer("Genes", palette="Dark2", na.value="cornsilk3")
-
-emale_prot_ava = emale_prot_ava
 
 
 
