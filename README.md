@@ -21,7 +21,7 @@ python3 04.syntny_data_prepare.py <species_Chr_start_end.maf> <species_Chr_start
  ```
 ### extract annotation from gtf base on the ava
 ```shell
-python3 <species_Chr_start_end.ava> <species_Chr_start_end.ana>
+python3 05.seq_annotation.py <species_Chr_start_end.ava> <species_Chr_start_end.ana>
 ```
 ### visualization
 ```shell
