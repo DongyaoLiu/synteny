@@ -80,13 +80,11 @@ def gap_detection(two_object_2, ava_list, gap_file_out):
     else:
         pass 
     ava_file.close()
-    return out_seq_dict
 
 def synteney_analysis(list_name_list, two_compare_object, ava_location):
     ava_file = open(f"{ava_location}", "a")
     Obj1 = two_compare_object[0]
     Obj2 = two_compare_object[1]
-    out_ava_list = []
     out_ava_list = []
     gap_detect_list = []
     for block_name in list_name_list:
@@ -149,9 +147,8 @@ for line in maf.readlines():
 ##########################################################
 ava_location = sys.argv[2]
 
-seq_start_end_dict = {}
 for combination in itertools.combinations(species_name_list,2):
-    seq_start_end_dict = synteney_analysis(block_name_list, combination, ava_location, seq_start_end_dict)
+    synteney_analysis(block_name_list, combination, ava_location)
     
 
 
